@@ -912,6 +912,28 @@ ul, ol {
   line-height: 1.7;
 }
 
+.form-status {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 20px;
+}
+
+.form-status-success {
+  color: #2f855a;
+}
+
+.form-status-error {
+  color: #e53e3e;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 @media (max-width: 768px) {
   .contact-form {
     padding: 24px;

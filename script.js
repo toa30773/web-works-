@@ -48,7 +48,18 @@
     });
   });
 
-  form.addEventListener('submit', (e) => {
+  const statusEl = document.getElementById('formStatus');
+  const submitBtn = document.getElementById('submitBtn');
+
+  const setStatus = (msg, type) => {
+    if (!statusEl) return;
+    statusEl.textContent = msg;
+    statusEl.className = 'form-status' + (type ? ' form-status-' + type : '');
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
     let hasError = false;
     fields.forEach(({ id, validate, message }) => {
       const input = document.getElementById(id);
@@ -62,9 +73,40 @@
     });
 
     if (hasError) {
-      e.preventDefault();
       const firstError = form.querySelector('.error');
       if (firstError) firstError.focus();
+      setStatus('入力内容をご確認ください。', 'error');
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '送信中…';
+    }
+    setStatus('送信しています…', '');
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+
+      if (response.ok) {
+        form.reset();
+        setStatus('送信ありがとうございました。通常2営業日以内にご返信いたします。', 'success');
+      } else {
+        const data = await response.json().catch(() => ({}));
+        const msg = data.errors ? data.errors.map((x) => x.message).join(', ') : '送信に失敗しました。時間をおいて再度お試しください。';
+        setStatus(msg, 'error');
+      }
+    } catch (err) {
+      setStatus('通信エラーが発生しました。ネットワーク環境をご確認ください。', 'error');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '送信する';
+      }
     }
   });
 })();
